@@ -152,7 +152,6 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         if (this.bonusValue) finalFormula += ` + ${this.bonusValue}`;
         
         const roll = await new Roll(finalFormula).evaluate();
-        if (game.dice3d) await game.dice3d.showForRoll(roll);
         
         const success = roll.total >= flags.dc;
         
