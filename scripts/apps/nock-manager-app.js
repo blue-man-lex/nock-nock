@@ -7,6 +7,8 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         super(options);
         this.selectedId = null;
         this.selectedType = null;
+        // Добавляем отслеживание состояния списков (по умолчанию открыты)
+        this.expandedCategories = { chests: true, doors: true };
     }
     static DEFAULT_OPTIONS = {
         id: "nock-nock-manager",
@@ -16,14 +18,16 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: "fas fa-key",
             resizable: true,
         },
-        position: { width: 890, height: 650 },
-        classes: ["nock-nock-app", "bg3-crafting-app"],
+        // СУЖАЕМ окно до 780px и делаем высоту АДАПТИВНОЙ (auto)
+        position: { width: 780, height: "auto" },
+        classes: ["nock-nock-app"],
         actions: {
             selectTarget: this._onSelectTarget,
             pingTarget: this._onPingTarget,
             toggleLock: this._onToggleLock,
             saveSettings: this._onSaveSettings,
-            removeKey: this._onRemoveKey
+            removeKey: this._onRemoveKey,
+            toggleCategory: this._onToggleCategory // Новый экшен для сворачивания
         }
     };
     static PARTS = {
@@ -115,7 +119,8 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             doors: doors,
             chests: chests,
             hasTargets: doors.length > 0 || chests.length > 0,
-            selected: this.selectedId ? this._getSelectedData() : null
+            selected: this.selectedId ? this._getSelectedData() : null,
+            expanded: this.expandedCategories // Прокидываем состояния списков в HBS
         };
     }
     _getSelectedData() {
@@ -227,6 +232,14 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
         await doc.setFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA, currentFlags);
         ui.notifications.info("Nock Nock: Ключ удален из замка.");
+        this.render({ force: true });
+    }
+
+    // ДОБАВЬ этот метод куда-нибудь рядом с другими `static async _on...` 
+    static async _onToggleCategory(event, target) {
+        const category = target.dataset.category;
+        // Переключаем true на false и наоборот
+        this.expandedCategories[category] = !this.expandedCategories[category];
         this.render({ force: true });
     }
 }

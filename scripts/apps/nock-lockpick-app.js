@@ -15,7 +15,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         tag: "div",
         window: { title: "Взлом замка", resizable: false, controls: [] },
         position: { width: 500, height: "auto" },
-        classes: ["nock-lockpick-app", "bg3-crafting-app"],
+        classes: ["nock-lockpick-app"],
         actions: {
             setStat: this._onSetStat,
             toggleAdvantage: this._onToggleAdvantage,

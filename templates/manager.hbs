@@ -6,22 +6,24 @@
         <div class="recipe-list">
             {{#if hasTargets}}
                 
+                <!-- Сундуки -->
                 <div class="global-category">
-                    <div class="global-header">
+                    <div class="global-header" data-action="toggleCategory" data-category="chests" style="cursor: pointer;" title="Свернуть/Развернуть">
                         <span class="category-icon"><i class="fas fa-box-open"></i></span>
                         <span class="category-name">Сундуки</span>
                         <span class="subcategory-recipe-count">{{chests.length}}</span>
+                        <!-- Иконка стрелочки, которая меняется в зависимости от состояния -->
+                        <i class="fas fa-chevron-{{#if expanded.chests}}down{{else}}right{{/if}}" style="margin-left: 8px; font-size: 0.85em; color: var(--thm-text-muted);"></i>
                     </div>
+                    {{#if expanded.chests}}
                     <div class="group-content">
                         {{#each chests}}
                         <div class="category-btn {{#if this.isSelected}}active{{/if}} recipe-item" 
                              data-action="selectTarget" data-id="{{this.id}}" data-type="{{this.type}}">
-                            
                             <span style="display:flex; align-items:center; gap:8px;">
                                 {{#if this.img}}<img src="{{this.img}}" width="24" height="24" style="border-radius:4px; border:1px solid #000;">{{/if}}
                                 {{this.name}}
                             </span>
-                            
                             <div>
                                 <i class="fas {{#if this.isLocked}}fa-lock{{else}}fa-lock-open{{/if}}" 
                                    style="color:{{#if this.isLocked}}#e84118{{else}}#4cd137{{/if}}; margin-right:5px; cursor: pointer;" 
@@ -32,21 +34,24 @@
                         </div>
                         {{/each}}
                     </div>
+                    {{/if}}
                 </div>
 
+                <!-- Двери -->
                 <div class="global-category">
-                    <div class="global-header" style="margin-top: 10px;">
+                    <div class="global-header" style="margin-top: 10px; cursor: pointer;" data-action="toggleCategory" data-category="doors" title="Свернуть/Развернуть">
                         <span class="category-icon"><i class="fas fa-door-closed"></i></span>
                         <span class="category-name">Двери</span>
                         <span class="subcategory-recipe-count">{{doors.length}}</span>
+                        <!-- Иконка стрелочки -->
+                        <i class="fas fa-chevron-{{#if expanded.doors}}down{{else}}right{{/if}}" style="margin-left: 8px; font-size: 0.85em; color: var(--thm-text-muted);"></i>
                     </div>
+                    {{#if expanded.doors}}
                     <div class="group-content">
                         {{#each doors}}
                         <div class="category-btn {{#if this.isSelected}}active{{/if}} recipe-item" 
                              data-action="selectTarget" data-id="{{this.id}}" data-type="{{this.type}}">
-                            
                             <span>{{this.name}}</span>
-                            
                             <div>
                                 <i class="fas {{#if this.isLocked}}fa-lock{{else}}fa-lock-open{{/if}}" 
                                    style="color:{{#if this.isLocked}}#e84118{{else}}#4cd137{{/if}}; margin-right:5px; cursor: pointer;" 
@@ -57,6 +62,7 @@
                         </div>
                         {{/each}}
                     </div>
+                    {{/if}}
                 </div>
 
             {{else}}
