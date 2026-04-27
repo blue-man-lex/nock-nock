@@ -1,15 +1,24 @@
 import { NOCK_CONST } from "../core/constants.js";
 import { nockSocket } from "../core/main.js";
+import { SystemManager } from "../systems/system-manager.js";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
 export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
     constructor(targetDoc, type, options = {}) {
         super(options);
         this.targetDoc = targetDoc;
         this.type = type;
-        this.selectedStat = "dex";
+        
+        // Получаем адаптер для определения начального стата
+        const adapter = SystemManager.get();
+        const actorData = adapter.getActorData(game.user.character);
+        this.selectedStat = actorData.stats[0]?.id || "dex";
+        
         this.bonusValue = ""; 
         this.advantage = 0;
     }
+
     static DEFAULT_OPTIONS = {
         id: "nock-lockpick-window",
         tag: "div",
@@ -23,9 +32,11 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
             useKey: this._onUseKey
         }
     };
+
     static PARTS = {
         main: { template: "modules/nock-nock/templates/lockpick.hbs" }
     };
+
     _onRender(context, options) {
         super._onRender(context, options);
         const bonusInput = this.element.querySelector("#custom-bonus-text");
@@ -35,41 +46,34 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
             });
         }
     }
+
     async _prepareContext(options) {
-        const flags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || { dc: 15 };
+        const adapter = SystemManager.get();
+        const flags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
+        const dc = adapter.getDC(this.targetDoc);
+        
         const character = game.user.character;
+        const actorData = adapter.getActorData(character);
         
-        const allowedStats = flags.allowedStats || { str: false, dex: true, int: false };
+        // Проверка доступности выбранного стата (если в модуле есть ограничение по статам)
+        const allowedStats = flags.allowedStats || {};
+        const hasAllowedConstraints = Object.values(allowedStats).some(v => v === true);
         
-        if (!allowedStats[this.selectedStat]) {
-            if (allowedStats.dex) this.selectedStat = 'dex';
-            else if (allowedStats.str) this.selectedStat = 'str';
-            else if (allowedStats.int) this.selectedStat = 'int';
+        if (hasAllowedConstraints && !allowedStats[this.selectedStat]) {
+            const firstAllowed = Object.keys(allowedStats).find(k => allowedStats[k]);
+            if (firstAllowed) this.selectedStat = firstAllowed;
         }
         
         let hasKey = false;
         if (flags.key?.uuid && character) {
             hasKey = !!character.items.find(i => i.uuid === flags.key.uuid || i.name === flags.key.name);
         }
-        let statMod = 0;
-        let toolBonus = 0;
-        let toolName = null;
-        if (character) {
-            statMod = character.system.abilities[this.selectedStat]?.mod || 0;
-            
-        
-            const lockpickTool = character.items.find(i => 
-                i.name.toLowerCase().includes("вора") || 
-                i.name.toLowerCase().includes("thiev") ||
-                i.system.toolType === "thief"
-            );
 
-            if (lockpickTool) {
-                toolName = lockpickTool.name;
-                
-                toolBonus = character.system.attributes.prof || 0;
-            }
-        }
+        const currentStat = actorData.stats.find(s => s.id === this.selectedStat);
+        const statMod = currentStat?.mod || 0;
+        const toolBonus = actorData.toolBonus || 0;
+        const toolName = actorData.toolName;
+
         let numericCustomBonus = 0;
         let customFormulaDisplay = "";
         if (this.bonusValue) {
@@ -83,6 +87,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 customFormulaDisplay = this.bonusValue.trim();
             }
         }
+
         let baseTotal = statMod + toolBonus + numericCustomBonus;
         let displayTotal = customFormulaDisplay ? `${baseTotal > 0 ? baseTotal + ' + ' : ''}${customFormulaDisplay}` : baseTotal;
         
@@ -97,8 +102,12 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         
         return {
-            flags: flags,
-            allowedStats: allowedStats,
+            flags: { ...flags, dc: dc },
+            allowedStats: actorData.stats.reduce((acc, s) => {
+                acc[s.id] = hasAllowedConstraints ? (allowedStats[s.id] || false) : true;
+                return acc;
+            }, {}),
+            statsList: actorData.stats, // Передаем список статов для шаблона
             targetName: this.type === 'door' ? "Дверь" : this.targetDoc.name,
             hasKey: hasKey,
             keyData: flags.key,
@@ -112,27 +121,35 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
             displayTotal: displayTotal,
             advantage: this.advantage,
             remainingAttempts: remaining,
-            isJammed: isJammed
+            isJammed: isJammed,
+            isCPR: adapter.id === "cyberpunk-red-core" // Флаг для спец-логики в шаблоне если надо
         };
     }
+
     static _onSetStat(event, target) {
         this.selectedStat = target.dataset.stat;
         this.render(true);
     }
+
     static _onToggleAdvantage(event, target) {
         this.advantage = parseInt(target.dataset.val);
         this.render(true);
     }
+
     static async _onUseKey() {
         ui.notifications.info("Вы использовали ключ...");
         await nockSocket.executeAsGM("requestUnlock", { uuid: this.targetDoc.uuid });
         this.close();
     }
+
     static async _onRollDice(event, target) {
-        const flags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || { dc: 15 };
+        const adapter = SystemManager.get();
+        const flags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
+        const dc = adapter.getDC(this.targetDoc);
         
         const maxAttempts = flags.maxAttempts || 0;
         const failedAttempts = flags.failedAttempts || 0;
+        
         if (maxAttempts > 0 && failedAttempts >= maxAttempts) {
             ui.notifications.error("Замок заклинило! Больше попыток нет.");
             return;
@@ -143,17 +160,15 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         await new Promise(r => setTimeout(r, 400));
         circle.classList.remove("nock-shake");
         
-        const context = await this._prepareContext();
-        let formula = "1d20";
-        if (this.advantage === 1) formula = "2d20kh1";
-        if (this.advantage === -1) formula = "2d20kl1";
-        
-        let finalFormula = `${formula} + ${context.statMod} + ${context.toolBonus}`;
-        if (this.bonusValue) finalFormula += ` + ${this.bonusValue}`;
-        
-        const roll = await new Roll(finalFormula).evaluate();
-        
-        const success = roll.total >= flags.dc;
+        const rollResult = await adapter.performRoll(game.user.character, {
+            statId: this.selectedStat,
+            dc: dc,
+            bonusFormula: this.bonusValue,
+            advantage: this.advantage
+        });
+
+        const success = rollResult.success;
+        const roll = rollResult.roll;
         
         let attemptsText = "";
         if (!success && maxAttempts > 0) {
@@ -171,7 +186,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
                     ${success ? '<i class="fas fa-unlock"></i> УСПЕХ' : '<i class="fas fa-lock"></i> ПРОВАЛ'}
                 </h3>
                 <div style="font-size: 0.85em; color: #888; margin-top: 5px;">
-                    Цель: ${this.type === 'door' ? 'Дверь' : this.targetDoc.name} (DC ${flags.dc})
+                    Цель: ${this.type === 'door' ? 'Дверь' : this.targetDoc.name} (DC/DV ${dc})
                     ${attemptsText}
                 </div>
             </div>
@@ -187,45 +202,27 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
             await nockSocket.executeAsGM("requestUnlock", { uuid: this.targetDoc.uuid });
             this.close();
         } else {
-            ui.notifications.error("Слишком сложно...");
+            ui.notifications.error("Неудача...");
             
-            // Проверяем, стала ли эта попытка последней
             const isNowJammed = maxAttempts > 0 && (failedAttempts + 1) >= maxAttempts;
-            
-            if (isNowJammed) {
-            } else {
+            if (!isNowJammed) {
                 const failSound = game.settings.get(NOCK_CONST.MODULE_ID, "failSound");
                 if (failSound) {
-                    const audio = new Audio(failSound);
-                    audio.volume = 0.6;
-                    audio.addEventListener('canplaythrough', () => audio.play());
-                    audio.addEventListener('error', (e) => console.error("Nock Nock | Fail sound error:", e));
-                    audio.load();
+                    foundry.audio.AudioHelper.play({ src: failSound, volume: 0.6 }, true);
                 }
             }
 
-            // Фиксируем провал через сокет
             await nockSocket.executeAsGM("recordFailure", { uuid: this.targetDoc.uuid });
-            
-            // Проверяем клинил ли замок после этой попытки
-            const newFlags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
-            const newFailedAttempts = newFlags.failedAttempts || 0;
-            const isNowJammedAfter = maxAttempts > 0 && newFailedAttempts >= maxAttempts;
-            
-            // Перерисовываем UI чтобы обновить счетчик и показать клин
             this.render(true);
             
-            if (isNowJammedAfter) {
-                // Замок только что клинил - играем звук КЛИНА
+            const newFlags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
+            if (maxAttempts > 0 && (newFlags.failedAttempts || 0) >= maxAttempts) {
                 const jamSound = game.settings.get(NOCK_CONST.MODULE_ID, "jamSound");
                 if (jamSound) {
-                    const audio = new Audio(jamSound);
-                    audio.volume = 0.8;
-                    audio.addEventListener('canplaythrough', () => audio.play());
-                    audio.addEventListener('error', (e) => console.error("Nock Nock | Jam sound error:", e));
-                    audio.load();
+                    foundry.audio.AudioHelper.play({ src: jamSound, volume: 0.8 }, true);
                 }
             }
         }
     }
 }
+

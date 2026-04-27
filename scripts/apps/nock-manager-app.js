@@ -1,4 +1,5 @@
 import { NOCK_CONST } from "../core/constants.js";
+import { SystemManager } from "../systems/system-manager.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -7,9 +8,9 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         super(options);
         this.selectedId = null;
         this.selectedType = null;
-        // Добавляем отслеживание состояния списков (по умолчанию открыты)
         this.expandedCategories = { chests: true, doors: true };
     }
+
     static DEFAULT_OPTIONS = {
         id: "nock-nock-manager",
         tag: "form",
@@ -18,8 +19,7 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: "fas fa-key",
             resizable: true,
         },
-        // СУЖАЕМ окно до 780px и делаем высоту АДАПТИВНОЙ (auto)
-        position: { width: 780, height: "auto" },
+        position: { width: 790, height: "auto" },
         classes: ["nock-nock-app"],
         actions: {
             selectTarget: this._onSelectTarget,
@@ -27,9 +27,10 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             toggleLock: this._onToggleLock,
             saveSettings: this._onSaveSettings,
             removeKey: this._onRemoveKey,
-            toggleCategory: this._onToggleCategory // Новый экшен для сворачивания
+            toggleCategory: this._onToggleCategory 
         }
     };
+
     static PARTS = {
         main: { template: "modules/nock-nock/templates/manager.hbs" }
     };
@@ -51,7 +52,6 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     async _onDrop(event) {
         event.preventDefault(); 
-        
         if (!this.selectedId) return;
         const data = TextEditor.getDragEventData(event);
         if (data.type !== "Item") {
@@ -70,10 +70,11 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         };
         await doc.setFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA, currentFlags);
         ui.notifications.info(`Nock Nock: Ключ [${item.name}] успешно привязан!`);
-        
         this.render({ force: true });
     }
+
     async _prepareContext(options) {
+        const adapter = SystemManager.get();
         const scene = canvas.scene;
         if (!scene) return { hasScene: false };
 
@@ -90,14 +91,23 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const chests = canvas.tokens.placeables
             .filter(t => {
                 if (!t.actor) return false;
-                const isTHM = t.actor.flags?.["treasure-hoard-manager"]?.data;
-                const isIP = t.actor.flags?.["item-piles"]?.data?.enabled;
+                
+                const isTHMActive = game.modules.get("treasure-hoard-manager")?.active;
+                const isIPActive = game.modules.get("item-piles")?.active;
+
+                const isTHM = isTHMActive && (t.actor.getFlag("treasure-hoard-manager", "data") !== undefined);
+                const isIP = isIPActive && t.actor.getFlag("item-piles", "data.enabled");
+                
                 const isLoot = t.actor.type === "loot" || t.name.startsWith("Loot:");
                 return isTHM || isIP || isLoot;
             })
             .map(t => {
-                const isTHMLocked = t.actor.flags?.["treasure-hoard-manager"]?.data?.locked;
-                const isIPLocked = t.actor.flags?.["item-piles"]?.data?.locked;
+                const isTHMActive = game.modules.get("treasure-hoard-manager")?.active;
+                const isIPActive = game.modules.get("item-piles")?.active;
+
+                const isTHMLocked = isTHMActive && t.actor.getFlag("treasure-hoard-manager", "data.locked");
+                const isIPLocked = isIPActive && t.actor.getFlag("item-piles", "data.locked");
+                
                 return {
                     id: t.id,
                     name: t.name,
@@ -114,34 +124,41 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             this.selectedType = firstTarget.type;
         }
 
+        const actorData = adapter.getActorData(null);
+
         return {
             hasScene: true,
             doors: doors,
             chests: chests,
             hasTargets: doors.length > 0 || chests.length > 0,
             selected: this.selectedId ? this._getSelectedData() : null,
-            expanded: this.expandedCategories // Прокидываем состояния списков в HBS
+            expanded: this.expandedCategories,
+            statsList: actorData.stats // Список статов для ГМа
         };
     }
+
     _getSelectedData() {
         let doc = this._getDocument();
         if (!doc) return null;
 
-        const defaultSettings = {
-            dc: 15,
-            allowedStats: { str: false, dex: true, int: false },
-            key: null 
-        };
+        const adapter = SystemManager.get();
+        const defaultDC = adapter.getDC(doc);
 
-        const flags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || defaultSettings;
-
+        const flags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
+        
         return {
             id: doc.id,
             name: this.selectedType === 'door' ? "Дверь" : doc.name,
             type: this.selectedType,
-            settings: flags
+            settings: {
+                dc: flags.dc || defaultDC,
+                maxAttempts: flags.maxAttempts || 0,
+                allowedStats: flags.allowedStats || {},
+                key: flags.key || null
+            }
         };
     }
+
     _getDocument() {
         if (this.selectedType === 'door') return canvas.walls.get(this.selectedId)?.document;
         if (this.selectedType === 'token') return canvas.tokens.get(this.selectedId)?.actor;
@@ -180,10 +197,13 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             const actor = canvas.tokens.get(id)?.actor;
             if (actor) {
                 const updates = {};
-                if (actor.flags?.["item-piles"]?.data?.enabled) {
+                const isIPActive = game.modules.get("item-piles")?.active;
+                const isTHMActive = game.modules.get("treasure-hoard-manager")?.active;
+
+                if (isIPActive && actor.getFlag("item-piles", "data.enabled")) {
                     updates["flags.item-piles.data.locked"] = !isCurrentlyLocked;
                 }
-                if (actor.flags?.["treasure-hoard-manager"]?.data) {
+                if (isTHMActive && actor.getFlag("treasure-hoard-manager", "data")) {
                     updates["flags.treasure-hoard-manager.data.locked"] = !isCurrentlyLocked;
                 }
                 
@@ -192,31 +212,34 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 }
             }
         }
-        
         this.render({ force: true });
     }
 
     static async _onSaveSettings(event, target) {
         if (!this.selectedId) return;
-        
         const doc = this._getDocument();
         if (!doc) return;
 
+        const adapter = SystemManager.get();
+        const statsList = adapter.getActorData(null).stats;
+        
         const element = this.element;
         const dc = parseInt(element.querySelector("#nock-dc").value) || 15;
         const maxAttempts = parseInt(element.querySelector("#nock-attempts").value) || 0;
-        const allowStr = element.querySelector("#nock-str").checked;
-        const allowDex = element.querySelector("#nock-dex").checked;
-        const allowInt = element.querySelector("#nock-int").checked;
+        
+        const allowedStats = {};
+        for (const stat of statsList) {
+            const checkbox = element.querySelector(`#nock-${stat.id}`);
+            if (checkbox) allowedStats[stat.id] = checkbox.checked;
+        }
 
         const currentFlags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
-
         const newSettings = {
             ...currentFlags,
             dc: dc,
             maxAttempts: maxAttempts,
             failedAttempts: 0,
-            allowedStats: { str: allowStr, dex: allowDex, int: allowInt }
+            allowedStats: allowedStats
         };
 
         await doc.setFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA, newSettings);
@@ -226,20 +249,17 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     static async _onRemoveKey(event, target) {
         const doc = this._getDocument();
         if (!doc) return;
-
         const currentFlags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
         currentFlags.key = null;
-
         await doc.setFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA, currentFlags);
         ui.notifications.info("Nock Nock: Ключ удален из замка.");
         this.render({ force: true });
     }
 
-    // ДОБАВЬ этот метод куда-нибудь рядом с другими `static async _on...` 
     static async _onToggleCategory(event, target) {
         const category = target.dataset.category;
-        // Переключаем true на false и наоборот
         this.expandedCategories[category] = !this.expandedCategories[category];
         this.render({ force: true });
     }
 }
+

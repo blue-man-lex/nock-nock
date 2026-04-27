@@ -119,18 +119,12 @@
     </div>
     
     <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%;">
+        {{#each statsList as |stat|}}
         <label class="bmc-minigame-toggle" style="cursor: pointer; margin: 0;">
-            <input type="checkbox" id="nock-str" {{#if selected.settings.allowedStats.str}}checked{{/if}}>
-            <span><i class="fas fa-hand-rock"></i> СИЛА</span>
+            <input type="checkbox" id="nock-{{stat.id}}" {{#if (lookup ../selected.settings.allowedStats stat.id)}}checked{{/if}}>
+            <span><i class="fas {{#if (eq stat.id 'str')}}fa-hand-rock{{else if (eq stat.id 'dex')}}fa-hands{{else if (eq stat.id 'int')}}fa-brain{{else}}fa-cog{{/if}}"></i> {{stat.label}}</span>
         </label>
-        <label class="bmc-minigame-toggle" style="cursor: pointer; margin: 0;">
-            <input type="checkbox" id="nock-dex" {{#if selected.settings.allowedStats.dex}}checked{{/if}}>
-            <span><i class="fas fa-hands"></i> ЛОВКОСТЬ</span>
-        </label>
-        <label class="bmc-minigame-toggle" style="cursor: pointer; margin: 0;">
-            <input type="checkbox" id="nock-int" {{#if selected.settings.allowedStats.int}}checked{{/if}}>
-            <span><i class="fas fa-brain"></i> МАГИЯ</span>
-        </label>
+        {{/each}}
     </div>
 </div>
             </div>

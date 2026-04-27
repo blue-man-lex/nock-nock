@@ -5,7 +5,7 @@
             <span class="nock-label" style="color: #e84118;">СТАТУС ЗАМКА:</span>
             <div class="nock-dc-value" style="color: #e84118; font-size: 2.2em; letter-spacing: 2px;">ЗАКЛИНИЛО</div>
         {{else}}
-            <span class="nock-label">СЛОЖНОСТЬ ЗАМКА:</span>
+            <span class="nock-label">{{#if isCPR}}СЛОЖНОСТЬ (DV):{{else}}СЛОЖНОСТЬ (DC):{{/if}}</span>
             <div class="nock-dc-value">{{flags.dc}}</div>
         {{/if}}
     </div>
@@ -33,7 +33,7 @@
             </div>
         {{else}}
             <div class="roll-circle" data-action="rollDice">
-                 <i class="fas fa-dice-d20"></i>
+                 <i class="fas {{#if isCPR}}fa-dice-d10{{else}}fa-dice-d20{{/if}}"></i>
             </div>
         {{/if}}
         
@@ -44,31 +44,26 @@
         {{/if}}
 
         <div class="advantage-row">
-             <i class="fas fa-arrow-down {{#if (eq advantage -1)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="-1" title="Помеха"></i>
-             <i class="fas fa-circle {{#if (eq advantage 0)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="0" title="Норма"></i>
-             <i class="fas fa-arrow-up {{#if (eq advantage 1)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="1" title="Преимущество"></i>
+            {{#if isCPR}}
+                <!-- В CPR обычно нет преимущества, но оставим место для модификаторов если надо -->
+            {{else}}
+                <i class="fas fa-arrow-down {{#if (eq advantage -1)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="-1" title="Помеха"></i>
+                <i class="fas fa-circle {{#if (eq advantage 0)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="0" title="Норма"></i>
+                <i class="fas fa-arrow-up {{#if (eq advantage 1)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="1" title="Преимущество"></i>
+            {{/if}}
         </div>
     </div>
 
     <div class="recipe-discovery">
         <div class="stat-buttons-row">
-            {{#if allowedStats.str}}
-            <div class="bmc-minigame-toggle {{#if (eq selectedStat 'str')}}active-stat{{/if}}" data-action="setStat" data-stat="str">
-                <i class="fas fa-hand-rock"></i> СИЛА
-            </div>
-            {{/if}}
-            
-            {{#if allowedStats.dex}}
-            <div class="bmc-minigame-toggle {{#if (eq selectedStat 'dex')}}active-stat{{/if}}" data-action="setStat" data-stat="dex">
-                <i class="fas fa-hands"></i> ЛОВКОСТЬ
-            </div>
-            {{/if}}
-            
-            {{#if allowedStats.int}}
-            <div class="bmc-minigame-toggle {{#if (eq selectedStat 'int')}}active-stat{{/if}}" data-action="setStat" data-stat="int">
-                <i class="fas fa-brain"></i> МАГИЯ
-            </div>
-            {{/if}}
+             {{#each statsList as |stat|}}
+                {{#if (lookup ../allowedStats stat.id)}}
+                <div class="bmc-minigame-toggle {{#if (eq ../selectedStat stat.id)}}active-stat{{/if}}" data-action="setStat" data-stat="{{stat.id}}">
+                    <i class="{{#if stat.icon}}{{stat.icon}}{{else}}fas fa-cog{{/if}}"></i> 
+                    {{stat.label}}
+                </div>
+                {{/if}}
+            {{/each}}
         </div>
 
         <div class="bonus-footer">
@@ -79,3 +74,4 @@
         </div>
     </div>
 </div>
+
