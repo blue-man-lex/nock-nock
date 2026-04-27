@@ -8,34 +8,68 @@ export class CyberpunkRedAdapter extends SystemAdapter {
 
     /**
      * Получение данных актера для CPR
-     * Возвращает список "типов взлома", привязанных к TECH и соответствующим навыкам
      */
     getActorData(actor) {
-        // Определяем типы задач, которые будут отображаться в UI вместо названий статов
         const stats = [
             { id: "pickLock", label: "Механический (TECH)", icon: "fas fa-key" },
             { id: "electronics", label: "Электронный (TECH)", icon: "fas fa-microchip" },
             { id: "basicTech", label: "Технический (TECH)", icon: "fas fa-tools" }
         ];
 
-        if (!actor) {
-            return { stats: stats, toolBonus: 0, toolName: null };
-        }
+        if (!actor) return { stats: stats, toolBonus: 0, toolName: null };
 
-        // Ищем навыки по internalId (самый надежный способ, не зависит от языка)
+        // 1. Извлекаем стат TECH
+        const techData = actor.system.stats?.tech;
+        // Приоритет: total (итоговый), actual или value (база)
+        const techStat = techData?.total ?? techData?.value ?? techData?.actual ?? 0;
+
+        // 2. Поиск навыков
+        // В CPR навыки - это айтемы типа 'skill'
         const skills = actor.items.filter(i => i.type === "skill");
         
-        const pickLockSkill = skills.find(i => i.system.internalId === "pick-lock");
-        const electronicsSkill = skills.find(i => i.system.internalId === "electronics-security-tech");
-        const basicTechSkill = skills.find(i => i.system.internalId === "basic-tech");
-        
-        // Базовая характеристика TECH (ТЕХ)
-        const techStat = actor.system.stats.tech?.value || 0;
+        const findSkillRobust = (keywords) => {
+            return skills.find(i => {
+                const iName = i.name.toLowerCase();
+                const iId = i.system.internalId || "";
+                
+                // Сначала проверяем ID (самый надежный способ)
+                if (keywords.ids && keywords.ids.some(id => iId === id)) return true;
+                
+                // Затем проверяем по ключевым словам (для локализаций)
+                // Обязательно проверяем, что навык относится к категории Техники
+                const isTechSkill = i.system.category === "techniqueSkills" || i.system.stat === "tech";
+                if (isTechSkill && keywords.terms && keywords.terms.some(term => iName.includes(term.toLowerCase()))) {
+                    return true;
+                }
+                return false;
+            });
+        };
 
-        // Расчет итогового модификатора: ТЕХ + Уровень Навыка
-        stats[0].mod = techStat + (pickLockSkill?.system.level || 0);
-        stats[1].mod = techStat + (electronicsSkill?.system.level || 0);
-        stats[2].mod = techStat + (basicTechSkill?.system.level || 0);
+        const pickLockSkill = findSkillRobust({ 
+            ids: ["pickLock", "pick-lock"], 
+            terms: ["pick lock", "взлом", "отмыч"] 
+        });
+        
+        const electronicsSkill = findSkillRobust({ 
+            ids: ["electronicsAndSecurityTech", "electronics-security-tech", "electronics"], 
+            terms: ["electronics", "электрон", "безопасн"] 
+        });
+        
+        const basicTechSkill = findSkillRobust({ 
+            ids: ["basicTech", "basic-tech"], 
+            terms: ["basic tech", "техник", "знание тех"] 
+        });
+        
+        const getSkillLevel = (skill) => {
+            if (!skill) return 0;
+            // Проверяем все возможные поля уровней
+            return skill.system.level ?? skill.system.rank ?? skill.system.value ?? 0;
+        };
+
+        // Расчет итоговых модификаторов
+        stats[0].mod = techStat + getSkillLevel(pickLockSkill);
+        stats[1].mod = techStat + getSkillLevel(electronicsSkill);
+        stats[2].mod = techStat + getSkillLevel(basicTechSkill);
 
         return {
             stats: stats,
@@ -44,27 +78,18 @@ export class CyberpunkRedAdapter extends SystemAdapter {
         };
     }
 
-    /**
-     * Выполнение броска (1d10 + Mod против DV)
-     */
     async performRoll(actor, { statId, dc, bonusFormula, advantage }) {
         const actorData = this.getActorData(actor);
-        const totalMod = actorData.stats.find(s => s.id === statId)?.mod || 0;
+        const currentStat = actorData.stats.find(s => s.id === statId);
+        const totalMod = currentStat?.mod || 0;
 
-        // Названия для лога в чате
-        const skillNames = {
-            pickLock: "Взлом механического замка",
-            electronics: "Обход электронной защиты",
-            basicTech: "Техническое вскрытие"
-        };
-        const skillName = skillNames[statId] || "Техника";
-
-        // В CPR используется 1d10 (с учетом взрывных единиц и десяток, но тут упрощенно для модуля)
+        // В CPR используется 1d10
         let formula = "1d10";
         let finalFormula = `${formula} + ${totalMod}`;
         
         if (bonusFormula) {
-            const cleanBonus = bonusFormula.startsWith('+') ? bonusFormula : `+ ${bonusFormula}`;
+            const trimmed = bonusFormula.trim();
+            const cleanBonus = trimmed.startsWith('+') || trimmed.startsWith('-') ? trimmed : `+ ${trimmed}`;
             finalFormula += ` ${cleanBonus}`;
         }
 
@@ -77,13 +102,9 @@ export class CyberpunkRedAdapter extends SystemAdapter {
         };
     }
 
-    /**
-     * Получение DV (Difficulty Value) замка
-     */
     getDC(targetDoc) {
-        // В CPR используется DV. Проверяем флаги или системные значения
         if (targetDoc.system?.DV) return targetDoc.system.DV;
         const flags = targetDoc.getFlag("nock-nock", "nockData");
-        return flags?.dc || 15; // По умолчанию DV 15 (средне)
+        return flags?.dc || 15; 
     }
 }

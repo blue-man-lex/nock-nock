@@ -10,10 +10,14 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         this.targetDoc = targetDoc;
         this.type = type;
         
-        // Получаем адаптер для определения начального стата
+        // Получаем адаптер
         const adapter = SystemManager.get();
-        const actorData = adapter.getActorData(game.user.character);
-        this.selectedStat = actorData.stats[0]?.id || "dex";
+        
+        // Умный поиск актера: сначала назначенный персонаж, затем выбранный токен
+        this.actor = game.user.character || canvas.tokens.controlled[0]?.actor;
+        
+        const actorData = adapter.getActorData(this.actor);
+        this.selectedStat = actorData.stats[0]?.id || "pickLock";
         
         this.bonusValue = ""; 
         this.advantage = 0;
@@ -52,8 +56,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const flags = this.targetDoc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
         const dc = adapter.getDC(this.targetDoc);
         
-        const character = game.user.character;
-        const actorData = adapter.getActorData(character);
+        const actorData = adapter.getActorData(this.actor);
         
         // Проверка доступности выбранного стата (если в модуле есть ограничение по статам)
         const allowedStats = flags.allowedStats || {};
@@ -65,8 +68,8 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         
         let hasKey = false;
-        if (flags.key?.uuid && character) {
-            hasKey = !!character.items.find(i => i.uuid === flags.key.uuid || i.name === flags.key.name);
+        if (flags.key?.uuid && this.actor) {
+            hasKey = !!this.actor.items.find(i => i.uuid === flags.key.uuid || i.name === flags.key.name);
         }
 
         const currentStat = actorData.stats.find(s => s.id === this.selectedStat);
@@ -160,7 +163,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         await new Promise(r => setTimeout(r, 400));
         circle.classList.remove("nock-shake");
         
-        const rollResult = await adapter.performRoll(game.user.character, {
+        const rollResult = await adapter.performRoll(this.actor, {
             statId: this.selectedStat,
             dc: dc,
             bonusFormula: this.bonusValue,
@@ -193,7 +196,7 @@ export class NockLockpickApp extends HandlebarsApplicationMixin(ApplicationV2) {
         `;
         
         await roll.toMessage({
-            speaker: ChatMessage.getSpeaker({actor: game.user.character}),
+            speaker: ChatMessage.getSpeaker({actor: this.actor}),
             flavor: flavor
         });
         
