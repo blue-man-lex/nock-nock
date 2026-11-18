@@ -2,32 +2,28 @@
   "id": "nock-nock",
   "title": "Nock Nock - Advanced Lockpicking",
   "description": "Интерактивная система взлома замков для дверей и сундуков.",
-  "version": "0.13.4",
+  "version": "0.14.1",
   "url": "https://github.com/blue-man-lex/nock-nock",
   "manifest": "https://raw.githubusercontent.com/blue-man-lex/nock-nock/main/module.json",
-  "download": "https://github.com/blue-man-lex/nock-nock/releases/download/0.13.4/nock-nock.zip",
+  "download": "https://github.com/blue-man-lex/nock-nock/releases/download/0.14.1/nock-nock.zip",
   "compatibility": {
     "minimum": "11",
     "verified": "13"
   },
   "authors": [
     {
-      "name": "Art_lex"
+      "name": "Art_lex",
+      "flags": {}
     }
   ],
   "esmodules": [
     "scripts/core/main.js"
   ],
   "styles": [
-    "styles/nock-nock.css"
+    {
+      "src": "styles/nock-nock.css"
+    }
   ],
   "socket": true,
-  "dependencies": [
-    {
-      "id": "socketlib",
-      "type": "module",
-      "manifest": "https://github.com/manuelolmos/socketlib/releases/latest/download/module.json",
-      "required": true
-    }
-  ]
+  "flags": {}
 }

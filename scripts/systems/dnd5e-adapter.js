@@ -22,17 +22,30 @@ export class Dnd5eAdapter extends SystemAdapter {
             };
         }
 
-        // Поиск инструментов вора (только если есть актер)
+        // Поиск инструментов вора (в инвентаре или в навыках владения инструментами)
         const lockpickTool = actor.items.find(i => 
-            i.name.toLowerCase().includes("вора") || 
-            i.name.toLowerCase().includes("thiev") ||
-            i.system.toolType === "thief"
+            i.name?.toLowerCase().includes("вора") || 
+            i.name?.toLowerCase().includes("thiev") ||
+            i.system?.toolType === "thief"
         );
+
+        const thiefSkillProf = actor.system?.tools?.thief?.value ?? actor.system?.tools?.thievery?.value ?? 0;
+        const profBonus = actor.system?.attributes?.prof || 2;
+        
+        let toolBonus = 0;
+        let toolName = lockpickTool?.name || null;
+
+        if (thiefSkillProf > 0) {
+            toolBonus = Math.round(profBonus * thiefSkillProf);
+            if (!toolName) toolName = "Владение воровскими инструментами";
+        } else if (lockpickTool) {
+            toolBonus = profBonus;
+        }
 
         return {
             stats: stats,
-            toolBonus: lockpickTool ? (actor.system.attributes.prof || 0) : 0,
-            toolName: lockpickTool?.name || null
+            toolBonus: toolBonus,
+            toolName: toolName
         };
     }
 
@@ -45,7 +58,13 @@ export class Dnd5eAdapter extends SystemAdapter {
         const statMod = actorData.stats.find(s => s.id === statId)?.mod || 0;
         
         let finalFormula = `${formula} + ${statMod} + ${actorData.toolBonus}`;
-        if (bonusFormula) finalFormula += ` + ${bonusFormula}`;
+        if (bonusFormula) {
+            const trimmed = String(bonusFormula).trim();
+            if (trimmed) {
+                const cleanBonus = (trimmed.startsWith('+') || trimmed.startsWith('-')) ? trimmed : `+ ${trimmed}`;
+                finalFormula += ` ${cleanBonus}`;
+            }
+        }
 
         const roll = await new Roll(finalFormula).evaluate();
         return {

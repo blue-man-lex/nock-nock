@@ -1,5 +1,6 @@
 <div class="nock-lockpick-container">
     
+    <!-- ШАПКА ЗАМКА -->
     <div class="nock-header">
         {{#if isJammed}}
             <span class="nock-label" style="color: #e84118;">СТАТУС ЗАМКА:</span>
@@ -10,6 +11,7 @@
         {{/if}}
     </div>
 
+    <!-- КНОПКА КЛЮЧА ЕСЛИ ЕСТЬ -->
     {{#if hasKey}}
     <div class="nock-key-area">
         <button class="bg3-btn nock-key-btn" data-action="useKey">
@@ -19,14 +21,206 @@
     </div>
     {{/if}}
 
-    <div class="dice-core-zone">
-        {{#if (not (eq remainingAttempts "∞"))}}
-            <div title="Осталось попыток" style="position: absolute; left: 15px; top: 15px; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px; border: 1px solid {{#if isJammed}}#e84118{{else}}#dcb174{{/if}};">
-                <i class="fas fa-tools" style="font-size: 1.5em; color: {{#if isJammed}}#e84118{{else}}#dcb174{{/if}};"></i>
-                <span style="font-size: 1.2em; font-weight: bold; margin-top: 5px; color: {{#if isJammed}}#e84118{{else}}#fff{{/if}};">{{remainingAttempts}}</span>
-            </div>
+    <!-- ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ ВЗЛОМА (ЕСЛИ РАЗРЕШЕНО НЕСКОЛЬКО) -->
+    {{#if hasMultipleModes}}
+    <div class="nock-mode-tabs">
+        {{#if mechanisms.cylinder}}
+        <button type="button" class="nock-tab-btn {{#if (eq activeMode 'cylinder')}}active{{/if}}" data-action="switchMode" data-mode="cylinder">
+            <i class="fas fa-key"></i> Отмычка
+        </button>
         {{/if}}
-        
+        {{#if mechanisms.pins}}
+        <button type="button" class="nock-tab-btn {{#if (eq activeMode 'pins')}}active{{/if}}" data-action="switchMode" data-mode="pins">
+            <i class="fas fa-cogs"></i> Штифты
+        </button>
+        {{/if}}
+        {{#if mechanisms.dials}}
+        <button type="button" class="nock-tab-btn {{#if (eq activeMode 'dials')}}active{{/if}}" data-action="switchMode" data-mode="dials">
+            <i class="fas fa-compact-disc"></i> Диски ({{dialsCount}})
+        </button>
+        {{/if}}
+
+        {{#if mechanisms.dice}}
+        <button type="button" class="nock-tab-btn {{#if (eq activeMode 'dice')}}active{{/if}}" data-action="switchMode" data-mode="dice">
+            <i class="fas fa-dice-d20"></i> Кубики
+        </button>
+        {{/if}}
+    </div>
+    {{/if}}
+
+    <!-- ИНДИКАТОР ПОПЫТОК -->
+    {{#if (not (eq remainingAttempts "∞"))}}
+    <div title="Осталось попыток" style="position: absolute; left: 15px; top: 15px; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 8px; border: 1px solid {{#if isJammed}}#e84118{{else}}#dcb174{{/if}}; z-index: 10;">
+        <i class="fas fa-tools" style="font-size: 1.3em; color: {{#if isJammed}}#e84118{{else}}#dcb174{{/if}};"></i>
+        <span style="font-size: 1.1em; font-weight: bold; margin-top: 3px; color: {{#if isJammed}}#e84118{{else}}#fff{{/if}};">{{remainingAttempts}}</span>
+    </div>
+    {{/if}}
+
+    <!-- ======================================================== -->
+    <!-- РЕЖИМ 1: МЕХАНИЧЕСКИЙ ЦИЛИНДР И ОТМЫЧКА (SKYRIM)       -->
+    <!-- ======================================================== -->
+    {{#if (eq activeMode 'cylinder')}}
+    <div class="nock-cylinder-game-wrap {{#if isJammed}}nock-wrap-jammed{{/if}}">
+        <div class="nock-cylinder-arena {{#if isJammed}}nock-arena-jammed{{/if}}">
+            <!-- Внешняя панель замка с текстурой -->
+            <div class="nock-lock-outer" style="background-image: url('modules/nock-nock/assets/lock_plate.jpg');"></div>
+            
+            <!-- Вращающийся центральный цилиндр со скважиной (Текстура литого сердечника) -->
+            <div class="nock-lock-cylinder" style="background-image: url('modules/nock-nock/assets/cylinder_core.png');">
+            </div>
+
+            <!-- Слой вращающейся отмычки (Кованая игла) -->
+            <div class="nock-pick-layer">
+                <div class="nock-pick-graphic" style="background-image: url('modules/nock-nock/assets/lockpick_needle.png');">
+                </div>
+            </div>
+
+            <!-- Поворотный рычаг / кованый ключ-натяжитель -->
+            <div class="nock-tension-tool" style="background-image: url('modules/nock-nock/assets/tension_wrench.png');"></div>
+        </div>
+
+        <!-- Шкала напряжения шпильки -->
+        <div class="nock-durability-meter">
+            <span>Напряжение шпильки:</span>
+            <div class="nock-durability-bar">
+                <div class="nock-durability-fill nock-strain-fill {{#if (gt pickStrain 60)}}critical{{/if}}" style="width: {{pickStrain}}%;"></div>
+            </div>
+            <span class="nock-durability-num">{{pickStrain}}%</span>
+        </div>
+
+        <p class="nock-cylinder-hint">
+            Двигайте мышь для поиска угла. Удерживайте кнопку или <kbd>Пробел</kbd> / <kbd>D</kbd> для поворота. Если шпилька дрожит — отпустите для сброса напряжения, иначе она сломается!
+        </p>
+
+        <!-- Кнопка взаимодействия для мыши/тачпада -->
+        <div style="display:flex; justify-content:center; margin: 10px 0 15px 0;">
+            <button type="button" class="bg3-btn nock-turn-btn {{#if isJammed}}jammed{{/if}}" id="nock-turn-cylinder-btn" {{#if isJammed}}disabled{{/if}}>
+                <i class="fas {{#if isJammed}}fa-lock{{else}}fa-redo{{/if}}"></i> {{#if isJammed}}ЗАМОК ЗАКЛИНИЛО{{else}}ПОВЕРНУТЬ ЗАМОК{{/if}}
+            </button>
+        </div>
+    </div>
+    {{/if}}
+
+    <!-- ======================================================== -->
+    <!-- РЕЖИМ 2: ШТИФТОВОЙ ЗАМОК (OBLIVION)                     -->
+    <!-- ======================================================== -->
+    {{#if (eq activeMode 'pins')}}
+    <div class="nock-pins-game-wrap {{#if isJammed}}nock-wrap-jammed{{/if}}">
+        <div class="nock-pins-arena {{#if isJammed}}nock-arena-jammed{{/if}}">
+            <!-- SVG ЛОМАНАЯ ЛИНИЯ СРЕЗА (Shear Line) -->
+            <svg class="nock-shear-svg" viewBox="0 0 408 230">
+                <path d="{{shearPathD}}" class="nock-shear-path" />
+                {{#each pinsChambers as |pin|}}
+                <circle cx="{{pin.centerX}}" cy="{{pin.targetShearY}}" r="3.5" class="nock-shear-point" />
+                {{/each}}
+            </svg>
+
+            <!-- Камеры со штифтами -->
+            <div class="nock-pins-chambers">
+                {{#each pinsChambers as |pin idx|}}
+                <div class="nock-chamber {{#if pin.isSelected}}selected{{/if}} {{#if pin.isLocked}}locked{{/if}}" data-index="{{idx}}">
+                    <!-- Метка среза для камеры -->
+                    <div class="nock-chamber-shear-mark" style="top: {{pin.targetShearY}}px;"></div>
+
+                    <div class="nock-spring" style="height: {{pin.springHeight}}px;"></div>
+                    <div class="nock-driver-pin {{#if pin.isLocked}}locked{{/if}}" style="top: {{pin.driverRestTop}}px; transform: translateY({{pin.driverY}}px);"></div>
+                    <div class="nock-key-pin {{#if pin.isLocked}}locked{{/if}}" style="top: {{pin.keyRestTop}}px; height: {{pin.keyHeight}}px; transform: translateY({{pin.keyY}}px);"></div>
+                </div>
+                {{/each}}
+            </div>
+
+            <!-- Кованая отмычка-лопатка (Oblivion Pick Lifter Sprite) -->
+            <div class="nock-pins-lifter-assembly">
+                <div class="nock-lifter-tool" style="left: {{activePickX}}px; transform: translateY(-{{activeLiftY}}px);"></div>
+            </div>
+        </div>
+
+        <p class="nock-cylinder-hint">
+            Стрелки <kbd>←</kbd> / <kbd>→</kbd> — выбор штифта. Удерживайте <kbd>↑</kbd> / <kbd>Пробел</kbd> или кнопку для подъема. Когда штифт войдет в пунктир (загорится зеленым) — отпустите!
+        </p>
+
+        <!-- Кнопки управления штифтами -->
+        <div class="nock-pins-controls">
+            <button type="button" class="nock-pins-btn" id="nock-pin-prev" title="Предыдущий штифт" {{#if isJammed}}disabled{{/if}}>
+                <i class="fas fa-arrow-left"></i> Влево
+            </button>
+            <button type="button" class="bg3-btn {{#if isJammed}}jammed{{/if}}" id="nock-pin-push" {{#if isJammed}}disabled{{/if}}>
+                <i class="fas {{#if isJammed}}fa-lock{{else}}fa-arrow-up{{/if}}"></i> {{#if isJammed}}ЗАКЛИНИЛО{{else}}УДЕРЖИВАТЬ ДЛЯ ПОДЪЕМА{{/if}}
+            </button>
+            <button type="button" class="nock-pins-btn" id="nock-pin-next" title="Следующий штифт" {{#if isJammed}}disabled{{/if}}>
+                Вправо <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+    {{/if}}
+
+    <!-- ======================================================== -->
+    <!-- РЕЖИМ 4: ДИСКОВЫЙ КРИПТЕКС (CONCENTRIC DIALS)           -->
+    <!-- ======================================================== -->
+    {{#if (eq activeMode 'dials')}}
+    <div class="nock-dials-game-wrap {{#if isJammed}}nock-wrap-jammed{{/if}}">
+        <div class="nock-dials-arena {{#if isJammed}}nock-arena-jammed{{/if}}">
+            <!-- Внешняя рама замка -->
+            <div class="nock-dials-frame" style="background-image: url('modules/nock-nock/assets/lock_plate.jpg');"></div>
+
+            <!-- Стек концентрических вращающихся колец -->
+            <div class="nock-dials-stack">
+                {{#each activeDials as |dial idx|}}
+                <div class="nock-dial-layer dial-ring-{{dial.ringNumber}} {{#if dial.isSelected}}selected{{/if}} {{#if dial.isAligned}}aligned{{/if}}" 
+                     data-index="{{idx}}" 
+                     style="transform: rotate({{dial.currentAngle}}deg); background-image: url('{{dial.texture}}');">
+                </div>
+                {{/each}}
+                <!-- Центральный медальон -->
+                <div class="nock-dial-center" style="background-image: url('modules/nock-nock/assets/dial_center.png');"></div>
+            </div>
+        </div>
+
+        <!-- Кнопки выбора колец -->
+        <div class="nock-dials-selector">
+            {{#each activeDials as |dial idx|}}
+            <button type="button" class="nock-dial-sel-btn {{#if dial.isSelected}}active{{/if}} {{#if dial.isAligned}}aligned{{/if}}" 
+                    data-action="selectDial" data-index="{{idx}}">
+                <i class="fas {{#if dial.isAligned}}fa-check-circle{{else}}fa-circle-notch{{/if}}"></i> {{dial.label}}
+            </button>
+            {{/each}}
+        </div>
+
+        <!-- Шкала завода пружины / стабильности механизма -->
+        <div class="nock-durability-meter">
+            <span>Завод механизма:</span>
+            <div class="nock-durability-bar">
+                <div class="nock-durability-fill {{#if (lt dialTension 30)}}critical{{/if}}" style="width: {{dialTension}}%;"></div>
+            </div>
+            <span class="nock-durability-num">{{dialTension}}%</span>
+        </div>
+
+        <p class="nock-cylinder-hint">
+            Кольцо <kbd>1</kbd>–<kbd>{{dialsCount}}</kbd> или клик. Вращайте кольцо в поисках внутреннего паза-фиксатора. Каждое вращение расходует ресурс механизма!
+        </p>
+
+        <!-- Кнопки управления вращением и фиксацией -->
+        <div class="nock-dials-controls">
+            <button type="button" class="nock-pins-btn" id="nock-dial-rot-left" title="Повернуть против часовой" {{#if isJammed}}disabled{{/if}}>
+                <i class="fas fa-undo"></i> Влево
+            </button>
+            <button type="button" class="bg3-btn {{#if isJammed}}jammed{{/if}}" id="nock-dial-lock-btn" {{#if isJammed}}disabled{{/if}}>
+                <i class="fas {{#if isJammed}}fa-lock{{else}}fa-check-double{{/if}}"></i> {{#if isJammed}}ЗАКЛИНИЛО{{else}}СЦЕПИТЬ ДИСКИ{{/if}}
+            </button>
+            <button type="button" class="nock-pins-btn" id="nock-dial-rot-right" title="Повернуть по часовой" {{#if isJammed}}disabled{{/if}}>
+                Вправо <i class="fas fa-redo"></i>
+            </button>
+        </div>
+    </div>
+    {{/if}}
+
+
+
+    <!-- ======================================================== -->
+    <!-- РЕЖИМ 3: КЛАССИЧЕСКИЙ БРОСОК КУБИКОВ (DICE / BG3)       -->
+    <!-- ======================================================== -->
+    {{#if (eq activeMode 'dice')}}
+    <div class="dice-core-zone">
         {{#if isJammed}}
             <div class="roll-circle" style="border-color: #e84118 !important; cursor: not-allowed; opacity: 0.5; box-shadow: inset 0 0 20px rgba(232, 65, 24, 0.2);">
                  <i class="fas fa-times" style="color: #e84118;"></i>
@@ -45,7 +239,7 @@
 
         <div class="advantage-row">
             {{#if isCPR}}
-                <!-- В CPR обычно нет преимущества, но оставим место для модификаторов если надо -->
+                <!-- В CPR обычно нет преимущества -->
             {{else}}
                 <i class="fas fa-arrow-down {{#if (eq advantage -1)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="-1" title="Помеха"></i>
                 <i class="fas fa-circle {{#if (eq advantage 0)}}active-adv{{/if}}" data-action="toggleAdvantage" data-val="0" title="Норма"></i>
@@ -53,7 +247,9 @@
             {{/if}}
         </div>
     </div>
+    {{/if}}
 
+    <!-- НИЖНЯЯ ПАНЕЛЬ С ХАРАКТЕРИСТИКАМИ И МОДИФИКАТОРАМИ -->
     <div class="recipe-discovery">
         <div class="stat-buttons-row">
              {{#each statsList as |stat|}}
@@ -68,10 +264,14 @@
 
         <div class="bonus-footer">
             <span>Модификатор: <strong>+{{statMod}}</strong></span>
+            {{#if toolBonus}}
+            <span class="separator">|</span>
+            <span>Инструмент: <strong>+{{toolBonus}}</strong></span>
+            {{/if}}
             <span class="separator">|</span>
             <span>Доп. бонус:</span>
             <input type="text" id="custom-bonus-text" value="{{bonusValue}}" placeholder="d4 / +2">
         </div>
     </div>
-</div>
 
+</div>

@@ -127,6 +127,34 @@
         {{/each}}
     </div>
 </div>
+
+<!-- КЕЙС: ТИПЫ ВЗЛОМА ЗАМКА -->
+<div class="nock-mechanisms-case">
+    <div class="nock-case-header">
+        <i class="fas fa-unlock-alt"></i> ДОСТУПНЫЕ ТИПЫ ВЗЛОМА
+    </div>
+    <div class="nock-mechanisms-grid">
+        <label class="nock-mech-card {{#if selected.settings.mechanisms.dice}}active{{/if}}" title="Бросок кубиков (Классика BG3: проверка характеристик d20 / d10)">
+            <input type="checkbox" id="nock-mech-dice" {{#if selected.settings.mechanisms.dice}}checked{{/if}}>
+            <i class="fas fa-dice-d20 mech-icon"></i>
+        </label>
+
+        <label class="nock-mech-card {{#if selected.settings.mechanisms.cylinder}}active{{/if}}" title="Цилиндр и отмычка (Механика Skyrim: поиск угла и поворот замка)">
+            <input type="checkbox" id="nock-mech-cylinder" {{#if selected.settings.mechanisms.cylinder}}checked{{/if}}>
+            <i class="fas fa-key mech-icon"></i>
+        </label>
+
+        <label class="nock-mech-card {{#if selected.settings.mechanisms.pins}}active{{/if}}" title="Штифтовой замок (Механика Oblivion: подъем и фиксация штифтов на линии среза)">
+            <input type="checkbox" id="nock-mech-pins" {{#if selected.settings.mechanisms.pins}}checked{{/if}}>
+            <i class="fas fa-cogs mech-icon"></i>
+        </label>
+
+        <label class="nock-mech-card {{#if selected.settings.mechanisms.dials}}active{{/if}}" title="Дисковый криптекс (Концентрические диски: подбор тайной комбинации 3–5 колец)">
+            <input type="checkbox" id="nock-mech-dials" {{#if selected.settings.mechanisms.dials}}checked{{/if}}>
+            <i class="fas fa-compact-disc mech-icon"></i>
+        </label>
+    </div>
+</div>
             </div>
 
             <div class="controls-area">

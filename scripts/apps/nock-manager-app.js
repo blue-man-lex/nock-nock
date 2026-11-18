@@ -19,7 +19,7 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: "fas fa-key",
             resizable: true,
         },
-        position: { width: 790, height: "auto" },
+        position: { width: 980, height: 750 },
         classes: ["nock-nock-app"],
         actions: {
             selectTarget: this._onSelectTarget,
@@ -145,6 +145,13 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const defaultDC = adapter.getDC(doc);
 
         const flags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
+        const mechanisms = flags.mechanisms || {
+            dice: true,
+            cylinder: true,
+            pins: true,
+            dials: true
+        };
+        if (mechanisms.dials === undefined) mechanisms.dials = true;
         
         return {
             id: doc.id,
@@ -154,7 +161,8 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 dc: flags.dc || defaultDC,
                 maxAttempts: flags.maxAttempts || 0,
                 allowedStats: flags.allowedStats || {},
-                key: flags.key || null
+                key: flags.key || null,
+                mechanisms: mechanisms
             }
         };
     }
@@ -233,13 +241,24 @@ export class NockManagerApp extends HandlebarsApplicationMixin(ApplicationV2) {
             if (checkbox) allowedStats[stat.id] = checkbox.checked;
         }
 
+        const mechanisms = {
+            dice: element.querySelector("#nock-mech-dice")?.checked ?? true,
+            cylinder: element.querySelector("#nock-mech-cylinder")?.checked ?? false,
+            pins: element.querySelector("#nock-mech-pins")?.checked ?? false,
+            dials: element.querySelector("#nock-mech-dials")?.checked ?? false
+        };
+        if (!mechanisms.dice && !mechanisms.cylinder && !mechanisms.pins && !mechanisms.dials) {
+            mechanisms.dice = true;
+        }
+
         const currentFlags = doc.getFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA) || {};
         const newSettings = {
             ...currentFlags,
             dc: dc,
             maxAttempts: maxAttempts,
             failedAttempts: 0,
-            allowedStats: allowedStats
+            allowedStats: allowedStats,
+            mechanisms: mechanisms
         };
 
         await doc.setFlag(NOCK_CONST.MODULE_ID, NOCK_CONST.FLAGS.DATA, newSettings);

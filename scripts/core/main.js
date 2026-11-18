@@ -143,11 +143,11 @@ async function _handleUnlockRequest({ uuid }) {
         if (Object.keys(updates).length > 0) {
             await doc.update(updates);
         }
+    }
 
-        const successSound = game.settings.get(NOCK_CONST.MODULE_ID, "successSound");
-        if (successSound) {
-            foundry.audio.AudioHelper.play({ src: successSound, volume: 0.8 }, true);
-        }
+    const successSound = game.settings.get(NOCK_CONST.MODULE_ID, "successSound");
+    if (successSound) {
+        foundry.audio.AudioHelper.play({ src: successSound, volume: 0.8 }, true);
     }
 }
 Hooks.on("getSceneControlButtons", (controlButtons) => {

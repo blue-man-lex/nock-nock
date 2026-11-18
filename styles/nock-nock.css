@@ -5,7 +5,7 @@
 /* ==========================================================
    ОБЩИЕ ПЕРЕМЕННЫЕ И ФОН ДЛЯ ОБОИХ ОКОН
    ========================================================== */
-.nock-nock-app, 
+.nock-nock-app,
 .nock-lockpick-app {
   --thm-bg-primary: #1a1814;
   --thm-bg-secondary: #2a251f;
@@ -36,6 +36,18 @@
 /* ==========================================================
    ОКНО МЕНЕДЖЕРА (NOCK MANAGER)
    ========================================================== */
+#nock-nock-manager,
+.nock-nock-app {
+  min-width: 980px !important;
+  min-height: 750px !important;
+}
+
+#nock-nock-manager .window-content {
+  min-width: 980px;
+  max-height: 94vh;
+  overflow-y: auto;
+}
+
 .nock-nock-app .bg3-craft-container {
   display: flex;
   height: 100%;
@@ -45,12 +57,29 @@
 
 /* Левая панель - Радар */
 .nock-nock-app .craft-sidebar {
-  width: 350px;
+  width: 290px;
   background: var(--thm-bg-secondary);
   border-right: 1px solid var(--thm-border-gold);
   padding: 15px;
   overflow-y: auto;
   flex-shrink: 0;
+}
+
+/* Правая панель - Настройки замка */
+.nock-nock-app .craft-workspace {
+  flex: 1;
+  padding: 20px 24px 35px 24px;
+  overflow-y: auto;
+  min-width: 0;
+  background: transparent;
+}
+
+.nock-nock-app .controls-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 25px;
 }
 
 .nock-nock-app .craft-sidebar h3 {
@@ -75,9 +104,11 @@
 }
 
 .nock-nock-app .global-header {
-  background: rgba(0, 0, 0, 0.2); /* Легкое затемнение вместо плотного цвета */
+  background: rgba(0, 0, 0, 0.2);
+  /* Легкое затемнение вместо плотного цвета */
   border: none;
-  border-bottom: 1px solid rgba(220, 177, 116, 0.3); /* Тонкая линия только снизу */
+  border-bottom: 1px solid rgba(220, 177, 116, 0.3);
+  /* Тонкая линия только снизу */
   border-radius: 4px 4px 0 0;
   padding: 8px 12px;
   display: flex;
@@ -108,7 +139,8 @@
   /* Жестко перебиваем абсолютное позиционирование из глобального крафта */
   position: static !important;
   transform: none !important;
-  margin-left: auto; /* Прижимает кружок к правому краю заголовка в левом меню */
+  margin-left: auto;
+  /* Прижимает кружок к правому краю заголовка в левом меню */
 }
 
 .nock-nock-app .group-content {
@@ -121,7 +153,8 @@
 .nock-nock-app .category-btn {
   background: transparent;
   border: 1px solid transparent;
-  border-bottom: 1px solid rgba(220, 177, 116, 0.05); /* Еле заметный разделитель */
+  border-bottom: 1px solid rgba(220, 177, 116, 0.05);
+  /* Еле заметный разделитель */
   border-radius: 4px;
   padding: 8px 12px;
   display: flex;
@@ -133,17 +166,21 @@
 }
 
 .nock-nock-app .category-btn:hover {
-  background: rgba(220, 177, 116, 0.05); /* Легкая подсветка фона при наведении */
+  background: rgba(220, 177, 116, 0.05);
+  /* Легкая подсветка фона при наведении */
   border-color: transparent;
   color: var(--thm-text-primary);
-  transform: translateX(3px); /* Легкий сдвиг вправо вместо прыжка вверх */
+  transform: translateX(3px);
+  /* Легкий сдвиг вправо вместо прыжка вверх */
   box-shadow: none;
 }
 
 .nock-nock-app .category-btn.active {
-  background: linear-gradient(90deg, rgba(220, 177, 116, 0.15), transparent); /* BG3 стиль */
+  background: linear-gradient(90deg, rgba(220, 177, 116, 0.15), transparent);
+  /* BG3 стиль */
   border: 1px solid transparent;
-  border-left: 3px solid var(--thm-accent-gold); /* Акцентная полоска слева */
+  border-left: 3px solid var(--thm-accent-gold);
+  /* Акцентная полоска слева */
   border-radius: 0 4px 4px 0;
   color: var(--thm-text-primary);
   box-shadow: none;
@@ -157,22 +194,24 @@
   align-items: center;
   gap: 10px;
   border-bottom: 2px solid var(--thm-border-gold);
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .nock-nock-app .craft-stage {
   background: var(--thm-bg-secondary);
   border: 1px solid var(--thm-border-bronze);
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
 }
 
 .nock-nock-app .components-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
+  margin-top: 5px !important;
+  margin-bottom: 10px !important;
 }
 
 .nock-nock-app .slot-container {
@@ -225,16 +264,25 @@
 }
 
 @keyframes bmcPulseGlowGold {
-  0% { box-shadow: 0 0 5px rgba(159, 130, 78, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(159, 130, 78, 0.8), 0 0 30px rgba(159, 130, 78, 0.4); }
-  100% { box-shadow: 0 0 5px rgba(159, 130, 78, 0.5); }
+  0% {
+    box-shadow: 0 0 5px rgba(159, 130, 78, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(159, 130, 78, 0.8), 0 0 30px rgba(159, 130, 78, 0.4);
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(159, 130, 78, 0.5);
+  }
 }
 
 /* Делаем блок настроек полностью прозрачным, убираем эффект "коробка в коробке" */
 .nock-nock-app .recipe-discovery {
   background: transparent;
   border: none;
-  border-top: 1px solid rgba(220, 177, 116, 0.15); /* Оставляем только нежную линию-разделитель сверху */
+  border-top: 1px solid rgba(220, 177, 116, 0.15);
+  /* Оставляем только нежную линию-разделитель сверху */
   border-radius: 0;
   padding: 20px 0 0 0;
   margin-top: 15px;
@@ -246,14 +294,16 @@
   background: transparent;
   border: none;
   width: 100%;
-  padding: 15px 0 0 0; /* Убрали боковые отступы, чтобы он полностью слился с окном */
+  padding: 15px 0 0 0;
+  /* Убрали боковые отступы, чтобы он полностью слился с окном */
 }
 
 /* Смягчаем рамки у чекбоксов Сила/Ловкость/Магия, чтобы не кричали */
 .nock-nock-app .bmc-minigame-toggle,
 .nock-lockpick-app .bmc-minigame-toggle {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(220, 177, 116, 0.2); /* Полупрозрачная рамка */
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(220, 177, 116, 0.2);
+  /* Полупрозрачная рамка */
   border-radius: 4px;
   padding: 8px 12px;
   cursor: pointer;
@@ -300,7 +350,8 @@
 }
 
 .nock-nock-app .bg3-btn.main-action {
-  background: rgba(220, 177, 116, 0.1); /* Полупрозрачный бронзовый фон */
+  background: rgba(220, 177, 116, 0.1);
+  /* Полупрозрачный бронзовый фон */
   border: 1px solid var(--thm-border-bronze);
   color: var(--thm-text-primary);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
@@ -369,7 +420,7 @@
 .nock-lockpick-app .dice-core-zone {
   height: 240px;
   width: 100%;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(220, 177, 116, 0.2);
   border-radius: 8px;
   display: flex;
@@ -386,7 +437,7 @@
   border-radius: 50% !important;
   border: 2px solid #9f824e !important;
   background: rgba(30, 30, 30, 0.9) !important;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -401,9 +452,17 @@
 }
 
 @keyframes dicePulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .nock-lockpick-app .fa-dice-d20 {
@@ -431,11 +490,26 @@
   transition: all 0.2s;
 }
 
-.nock-lockpick-app .advantage-row i:hover { transform: scale(1.2); }
+.nock-lockpick-app .advantage-row i:hover {
+  transform: scale(1.2);
+}
 
-.nock-lockpick-app .advantage-row i.active-adv[data-val="1"] { color: #4cd137; text-shadow: 0 0 10px #4cd137; transform: scale(1.3); }
-.nock-lockpick-app .advantage-row i.active-adv[data-val="-1"] { color: #e84118; text-shadow: 0 0 10px #e84118; transform: scale(1.3); }
-.nock-lockpick-app .advantage-row i.active-adv[data-val="0"] { color: #fff; text-shadow: 0 0 5px #fff; }
+.nock-lockpick-app .advantage-row i.active-adv[data-val="1"] {
+  color: #4cd137;
+  text-shadow: 0 0 10px #4cd137;
+  transform: scale(1.3);
+}
+
+.nock-lockpick-app .advantage-row i.active-adv[data-val="-1"] {
+  color: #e84118;
+  text-shadow: 0 0 10px #e84118;
+  transform: scale(1.3);
+}
+
+.nock-lockpick-app .advantage-row i.active-adv[data-val="0"] {
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+}
 
 .nock-lockpick-app .stat-buttons-row {
   display: flex;
@@ -467,7 +541,7 @@
 .nock-lockpick-app .bonus-footer input {
   width: 60px;
   height: 26px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid #dcb174;
   color: #fff;
   text-align: center;
@@ -479,19 +553,36 @@
   font-size: 0.9em;
   margin-top: 15px;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Анимация тряски при броске */
 .nock-shake {
-  animation: nock-shake-anim 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  animation: nock-shake-anim 0.4s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes nock-shake-anim {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 
 /* Кнопка удаления ключа в менеджере */
@@ -519,7 +610,7 @@
 
 .nock-nock-app ::-webkit-scrollbar-track,
 .nock-lockpick-app ::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .nock-nock-app ::-webkit-scrollbar-thumb,
@@ -534,5 +625,770 @@
 }
 
 .nock-nock-app .global-header:hover {
-  background: rgba(220, 177, 116, 0.1); /* Легкое золотое свечение при наведении */
+  background: rgba(220, 177, 116, 0.1);
+  /* Легкое золотое свечение при наведении */
 }
+
+/* ==========================================================
+   КЕЙС ТИПОВ ВЗЛОМА (В ОКНЕ МЕНЕДЖЕРА)
+   ========================================================== */
+.nock-mechanisms-case {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--thm-border-gold);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0 6px 0;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+.nock-case-header {
+  font-size: 0.85em;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--thm-accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(220, 177, 116, 0.2);
+  padding-bottom: 4px;
+}
+
+.nock-mechanisms-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 6px 0;
+  box-sizing: border-box;
+}
+
+.nock-mech-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(220, 177, 116, 0.3);
+  border-radius: 8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  user-select: none;
+  box-sizing: border-box;
+  min-width: 72px;
+}
+
+.nock-mech-card:hover {
+  background: rgba(220, 177, 116, 0.15);
+  border-color: var(--thm-border-bronze);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.nock-mech-card input[type="checkbox"] {
+  accent-color: var(--thm-accent-gold);
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.nock-mech-card .mech-icon {
+  font-size: 1.45em;
+  color: var(--thm-border-bronze);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.nock-mech-card:hover .mech-icon {
+  transform: scale(1.15);
+  color: var(--thm-accent-gold);
+}
+
+.nock-mech-card:has(input:checked) {
+  border-color: var(--thm-accent-gold);
+  background: rgba(243, 156, 18, 0.18);
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.35);
+}
+
+.nock-mech-card:has(input:checked) .mech-icon {
+  color: var(--thm-accent-gold);
+  text-shadow: 0 0 8px rgba(243, 156, 18, 0.7);
+}
+
+/* ==========================================================
+   ВКЛАДКИ РЕЖИМОВ ВЗЛОМА В ИНТЕРФЕЙСЕ ИГРОКА
+   ========================================================== */
+.nock-mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--thm-border-gold);
+}
+
+.nock-tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(220, 177, 116, 0.3);
+  color: var(--thm-text-secondary);
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 0.85em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Signika", sans-serif;
+}
+
+.nock-tab-btn:hover {
+  background: rgba(220, 177, 116, 0.15);
+  color: var(--thm-text-primary);
+  border-color: var(--thm-border-bronze);
+}
+
+.nock-tab-btn.active {
+  background: linear-gradient(180deg, rgba(220, 177, 116, 0.25), rgba(0, 0, 0, 0.4));
+  border-color: var(--thm-accent-gold);
+  color: var(--thm-accent-gold);
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.3);
+}
+
+/* ==========================================================
+   МИНИ-ИГРА 1: МЕХАНИЧЕСКИЙ ЦИЛИНДР И ОТМЫЧКА (SKYRIM)
+   ========================================================== */
+.nock-cylinder-arena {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin: 15px auto;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.nock-lock-outer {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(0, 0, 0, 0.9);
+  background-size: cover;
+  background-position: center;
+  border: 3px solid var(--thm-border-gold);
+}
+
+.nock-lock-cylinder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 144px;
+  height: 144px;
+  margin-top: -72px;
+  margin-left: -72px;
+  border-radius: 50%;
+  background: url('../assets/cylinder_core.png') center/cover no-repeat;
+  border: 3px solid #b89355;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.08s ease-out;
+  transform-origin: center center;
+}
+
+.nock-keyhole {
+  display: none;
+}
+
+.nock-pick-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  transition: transform 0.04s ease-out;
+}
+
+.nock-pick-graphic {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 18px;
+  height: 155px;
+  margin-left: -9px;
+  background: url('../assets/lockpick_needle.png') center/contain no-repeat;
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.85));
+  transform-origin: bottom center;
+}
+
+.nock-pick-tip {
+  display: none;
+}
+
+.nock-tension-tool {
+  position: absolute;
+  top: 180px;
+  left: 50%;
+  width: 34px;
+  height: 115px;
+  margin-left: -17px;
+  background: url('../assets/tension_wrench.png') center top/contain no-repeat;
+  filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.95));
+  transform-origin: top center;
+  transition: transform 0.08s ease-out;
+  pointer-events: none;
+}
+
+/* Вибрация отмычки при сопротивлении */
+.nock-pick-strain {
+  animation: nock-pick-strain-anim 0.05s infinite alternate;
+}
+
+@keyframes nock-pick-strain-anim {
+  0% {
+    transform: rotate(-2deg);
+  }
+
+  100% {
+    transform: rotate(2deg);
+  }
+}
+
+.nock-durability-meter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px auto;
+  width: 80%;
+  color: var(--thm-text-secondary);
+  font-size: 0.85em;
+}
+
+.nock-durability-bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--thm-border-bronze);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.nock-durability-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e84118, #f39c12 50%, #4cd137 100%);
+  width: 100%;
+  transition: width 0.1s ease;
+}
+
+.nock-strain-fill {
+  background: linear-gradient(90deg, #27ae60 0%, #f1c40f 45%, #e67e22 75%, #e74c3c 100%) !important;
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+  transition: width 0.04s ease;
+}
+
+.nock-strain-fill.critical {
+  box-shadow: 0 0 15px #e74c3c, 0 0 25px #c0392b !important;
+  animation: strainAlertPulse 0.2s infinite alternate;
+}
+
+@keyframes strainAlertPulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.35); }
+}
+
+.nock-cylinder-hint {
+  text-align: center;
+  color: var(--thm-text-muted);
+  font-size: 0.85em;
+  margin-top: 6px;
+  padding: 0 15px;
+}
+
+.nock-cylinder-hint kbd {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--thm-border-bronze);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: var(--thm-accent-gold);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+/* ==========================================================
+   МИНИ-ИГРА 2: ШТИФТОВОЙ ЗАМОК (OBLIVION)
+   ========================================================== */
+.nock-pins-arena {
+  width: 440px;
+  height: 330px;
+  margin: 15px auto;
+  background: radial-gradient(ellipse at center, #25201a 0%, #0d0c0a 100%);
+  border: 2px solid var(--thm-border-gold);
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95), 0 4px 15px rgba(0, 0, 0, 0.6);
+  position: relative;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* SVG ЛОМАНАЯ ЛИНИЯ СРЕЗА (Shear Line) */
+.nock-shear-svg {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 408px;
+  height: 230px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.nock-shear-path {
+  fill: none;
+  stroke: var(--thm-accent-gold);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+  filter: drop-shadow(0 0 4px rgba(243, 156, 18, 0.9));
+  opacity: 0.9;
+}
+
+.nock-shear-point {
+  fill: #fff;
+  stroke: var(--thm-accent-gold);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px #f39c12);
+}
+
+.nock-pins-chambers {
+  display: flex;
+  justify-content: space-around;
+  height: 230px;
+  position: relative;
+  border-bottom: 4px solid #665235;
+}
+
+.nock-chamber {
+  width: 62px;
+  height: 100%;
+  position: relative;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(220, 177, 116, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  overflow: hidden;
+}
+
+.nock-chamber.selected {
+  border-color: var(--thm-accent-gold);
+  box-shadow: 0 0 12px rgba(243, 156, 18, 0.45);
+}
+
+.nock-chamber.sweet-spot-ready {
+  border-color: #2ecc71 !important;
+  box-shadow: 0 0 18px rgba(46, 204, 113, 0.85), inset 0 0 15px rgba(46, 204, 113, 0.3) !important;
+  background: rgba(46, 204, 113, 0.08) !important;
+}
+
+.nock-chamber.locked {
+  border-color: #4cd137;
+  background: rgba(76, 209, 55, 0.15);
+  box-shadow: 0 0 10px rgba(76, 209, 55, 0.4);
+}
+
+/* Маркер линии среза внутри конкретной камеры */
+.nock-chamber-shear-mark {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #f39c12;
+  box-shadow: 0 0 6px #f39c12;
+  opacity: 0.7;
+  z-index: 3;
+  pointer-events: none;
+  transition: all 0.15s;
+}
+
+.nock-chamber.sweet-spot-ready .nock-chamber-shear-mark {
+  background: #2ecc71 !important;
+  box-shadow: 0 0 10px #2ecc71, 0 0 20px #2ecc71 !important;
+  height: 3px !important;
+  opacity: 1 !important;
+}
+
+.nock-spring {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  width: 26px;
+  background: url('../assets/pin_spring.png') center/100% 100% no-repeat;
+  transition: height 0.02s linear;
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+.nock-driver-pin {
+  position: absolute;
+  left: 13px;
+  width: 36px;
+  height: 60px;
+  background: url('../assets/pin_driver.png') center/100% 100% no-repeat;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.85));
+  transition: transform 0.02s linear, filter 0.2s;
+  z-index: 2;
+}
+
+.nock-key-pin {
+  position: absolute;
+  left: 13px;
+  width: 36px;
+  background: url('../assets/pin_key.png') center/100% 100% no-repeat;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.85));
+  transition: transform 0.02s linear, filter 0.2s;
+  z-index: 2;
+}
+
+.nock-driver-pin.locked,
+.nock-key-pin.locked {
+  filter: drop-shadow(0 0 8px rgba(76, 209, 55, 0.9)) brightness(1.1);
+}
+
+#nock-pin-push.in-sweet-spot {
+  background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+  box-shadow: 0 0 18px rgba(46, 204, 113, 0.9) !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  animation: sweetPulse 0.35s infinite alternate;
+}
+
+@keyframes sweetPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.03); filter: brightness(1.25); }
+}
+
+/* ==========================================================
+   КОВАНАЯ ОТМЫЧКА-ЛОПАТКА (OBLIVION PICK LIFTER SPRITE)
+   ========================================================== */
+.nock-pins-lifter-assembly {
+  position: absolute;
+  top: 226px;
+  left: 16px;
+  width: 408px;
+  height: 95px;
+  pointer-events: none;
+  z-index: 6;
+  overflow: hidden;
+}
+
+.nock-lifter-tool {
+  position: absolute;
+  top: 0;
+  width: 460px;
+  height: 88px;
+  margin-left: -446px;
+  background: url('../assets/pins_lifter_tool.png') right top/contain no-repeat;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.95));
+  transition: left 0.18s cubic-bezier(0.25, 1, 0.5, 1), transform 0.03s linear;
+  pointer-events: none;
+}
+
+#nock-pin-push {
+  min-width: 215px;
+  padding: 8px 16px;
+  font-size: 0.88em;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ==========================================================
+   СОСТОЯНИЕ ЗАКЛИНИВАНИЯ (JAMMED STATE)
+   ========================================================== */
+.nock-arena-jammed {
+  filter: grayscale(0.5) contrast(1.15) !important;
+  opacity: 0.82;
+  cursor: not-allowed !important;
+  pointer-events: all;
+}
+
+.nock-arena-jammed::after {
+  content: "ЗАКЛИНИЛО";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  font-size: 2.2em;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #e84118;
+  text-shadow: 0 0 20px rgba(232, 65, 24, 0.9), 0 0 5px #000;
+  border: 3px solid #e84118;
+  padding: 6px 18px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 20px rgba(232, 65, 24, 0.4);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nock-jammed-clank {
+  animation: nockJammedAnim 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes nockJammedAnim {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  20% {
+    transform: scale(1.02) rotate(-3deg);
+    filter: drop-shadow(0 0 15px #e84118);
+  }
+
+  40% {
+    transform: scale(0.98) rotate(3deg);
+    filter: drop-shadow(0 0 20px #e84118);
+  }
+
+  60% {
+    transform: scale(1.01) rotate(-2deg);
+  }
+
+  80% {
+    transform: scale(0.99) rotate(1deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: none;
+  }
+}
+
+.bg3-btn.jammed {
+  background: rgba(232, 65, 24, 0.2) !important;
+  border-color: #e84118 !important;
+  color: #e84118 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.nock-pins-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+}
+
+.nock-pins-btn {
+  background: rgba(220, 177, 116, 0.15);
+  border: 1px solid var(--thm-border-bronze);
+  color: var(--thm-text-primary);
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.nock-pins-btn:hover {
+  background: rgba(220, 177, 116, 0.3);
+  border-color: var(--thm-border-gold);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================
+   МИНИ-ИГРА 3: ДИСКОВЫЙ КРИПТЕКС (CONCENTRIC DIALS)
+   ========================================================== */
+.nock-dials-arena {
+  position: relative;
+  width: 330px;
+  height: 330px;
+  margin: 15px auto;
+  user-select: none;
+  cursor: grab;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 25px rgba(0, 0, 0, 0.9);
+  border: 3px solid var(--thm-border-gold);
+  overflow: hidden;
+}
+
+.nock-dials-arena:active {
+  cursor: grabbing;
+}
+
+.nock-dials-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* Верхний индикатор выравнивания */
+.nock-dials-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 165px;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nock-indicator-gem {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff3838 20%, #8b0000 100%);
+  border: 1px solid #ffd700;
+  box-shadow: 0 0 8px #ff3838;
+  margin-top: 6px;
+}
+
+.nock-indicator-line {
+  width: 2px;
+  height: 145px;
+  background: linear-gradient(180deg, #ff3838, #ffd700 30%, rgba(255, 215, 0, 0.2) 100%);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+}
+
+/* Стек концентрических колец */
+.nock-dials-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin-top: -150px;
+  margin-left: -150px;
+  pointer-events: none;
+}
+
+.nock-dial-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.08s ease-out, filter 0.2s;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.nock-dial-layer.selected {
+  filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.75));
+}
+
+.nock-dial-layer.aligned {
+  filter: drop-shadow(0 0 10px rgba(76, 209, 55, 0.85));
+}
+
+.nock-dial-layer.locked {
+  filter: drop-shadow(0 0 14px rgba(76, 209, 55, 0.95)) brightness(1.12) !important;
+  pointer-events: none;
+}
+
+.nock-dial-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  margin-top: -50%;
+  margin-left: -50%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
+  z-index: 5;
+}
+
+/* Селектор колец */
+.nock-dials-selector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px auto;
+  max-width: 90%;
+}
+
+.nock-dial-sel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(220, 177, 116, 0.3);
+  color: var(--thm-text-secondary);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nock-dial-sel-btn:hover {
+  background: rgba(220, 177, 116, 0.15);
+  color: var(--thm-text-primary);
+  border-color: var(--thm-border-bronze);
+}
+
+.nock-dial-sel-btn.active {
+  background: rgba(243, 156, 18, 0.2);
+  border-color: var(--thm-accent-gold);
+  color: var(--thm-accent-gold);
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.3);
+}
+
+.nock-dial-sel-btn.aligned {
+  border-color: #4cd137;
+  color: #4cd137;
+}
+
+.nock-durability-fill.critical {
+  animation: criticalPulse 0.5s infinite alternate;
+}
+
+@keyframes criticalPulse {
+  0% { opacity: 0.6; filter: brightness(0.9); }
+  100% { opacity: 1; filter: brightness(1.3); }
+}
+
+.nock-dials-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 10px 0 15px 0;
+}
+
+
